@@ -1,0 +1,52 @@
+# Plex Media Server Configuration
+pms:
+  # Storage for Plex configuration and database
+  configStorage: "10Gi"
+  # Use default storage class
+  storageClassName: null
+
+  # Environment variables for Plex
+  extraEnv:
+    # Get your claim token from https://www.plex.tv/claim/ (valid for 4 minutes)
+    PLEX_CLAIM: "claim-YOUR_CLAIM_TOKEN_HERE"
+    TZ: "America/Chicago"  # Set your timezone
+
+  # Resource limits (adjust as needed)
+  resources:
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+
+# Service configuration
+service:
+  type: NodePort
+  port: 32400
+  nodePort: 32400
+
+# Additional volumes for media
+extraVolumes:
+  - name: media-movies
+    hostPath:
+      path: /media/movies
+      type: Directory
+
+# Additional volume mounts
+extraVolumeMounts:
+  - name: media-movies
+    mountPath: /data/movies
+    readOnly: true
+
+# Optional: Enable ingress if you want domain access
+ingress:
+  # enabled: false
+  enabled: true
+  ingressClassName: "nginx"
+  url: "https://plex.local"
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"

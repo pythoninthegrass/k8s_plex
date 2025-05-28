@@ -1,0 +1,86 @@
+version: "3.0"
+
+set: ['e', 'u', 'pipefail']
+shopt: ['globstar']
+
+env:
+  SCRIPT:
+    sh: "echo ${SCRIPT:-bootstrap.sh}"
+  K8S_CLUSTER_NAME:
+    sh: "echo ${K8S_CLUSTER_NAME:-kube-plex-cluster}"
+  PLEX_NAMESPACE:
+    sh: "echo ${PLEX_NAMESPACE:-plex-media-server}"
+
+tasks:
+  create:
+    desc: "Create kind cluster"
+    cmds:
+      - |
+        {{.SCRIPT}} create
+    status:
+      - |
+        kind get clusters \
+        | grep -q "{{.K8S_CLUSTER_NAME}}"
+
+  delete:
+    desc: "Delete kind cluster"
+    cmds:
+      - |
+        {{.SCRIPT}} delete
+    status:
+      - |
+        ! kind get clusters \
+        | grep -q "{{.K8S_CLUSTER_NAME}}"
+
+  get:
+    desc: "List kind clusters"
+    cmds:
+      - |
+        {{.SCRIPT}} get
+
+  add-ingress:
+    desc: "Add nginx ingress controller"
+    cmds:
+      - |
+        {{.SCRIPT}} add-ingress
+    status:
+      - |
+        kubectl get pods -n ingress-nginx -l app.kubernetes.io/component=controller -o jsonpath='{.items[0].status.phase}' | grep -q "Running"
+
+  install-plex:
+    desc: "Install Plex Media Server"
+    cmds:
+      - |
+        {{.SCRIPT}} install-plex
+    status:
+      - |
+        kubectl get pods -n {{.PLEX_NAMESPACE}} -l app.kubernetes.io/name=plex-media-server -o jsonpath='{.items[0].status.phase}' | grep -q "Running"
+
+  smoke-test:
+    desc: "Test Plex media server access"
+    cmds:
+      - |
+        {{.SCRIPT}} smoke-test
+    status:
+      - |
+        kubectl get pods -n {{.PLEX_NAMESPACE}} -l app.kubernetes.io/name=plex-media-server -o jsonpath='{.items[0].status.phase}' | grep -q "Running"
+
+  # TODO: QA
+  start:
+    desc: "Start kind cluster"
+    cmds:
+      - |
+        {{.SCRIPT}} start
+    status:
+      - |
+        docker ps --filter "name={{.K8S_CLUSTER_NAME}}" -q > /dev/null
+
+  # TODO: QA
+  stop:
+    desc: "Stop kind cluster"
+    cmds:
+      - |
+        {{.SCRIPT}} stop
+    status:
+      - |
+        ! docker ps --filter "name={{.K8S_CLUSTER_NAME}}" -q > /dev/null

@@ -1,0 +1,20 @@
+version: "3.0"
+
+set: ['e', 'u', 'pipefail']
+shopt: ['globstar']
+
+dotenv: ['.env']
+
+env:
+
+vars:
+
+includes:
+  kind:
+    taskfile: ./taskfiles/kind.yml
+
+tasks:
+  default:
+    desc: "Default task"
+    cmds:
+      - task --list
