@@ -1,5 +1,6 @@
 # TODO
 
+* Migrate to [k8s-mediaserver-operator](https://github.com/kubealex/k8s-mediaserver-operator) since transcoding workers aren't available in the Plex Media Server chart
 * Debug adding a new server to the existing plex account
   * Tied to the claim token
   * Try removing [existing claim](https://support.plex.tv/articles/204281528-why-am-i-locked-out-of-server-settings-and-how-do-i-get-in/)
