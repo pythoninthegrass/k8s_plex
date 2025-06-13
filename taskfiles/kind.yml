@@ -3,13 +3,12 @@ version: "3.0"
 set: ['e', 'u', 'pipefail']
 shopt: ['globstar']
 
-env:
-  SCRIPT:
-    sh: "echo ${SCRIPT:-bootstrap.sh}"
-  K8S_CLUSTER_NAME:
-    sh: "echo ${K8S_CLUSTER_NAME:-kube-plex-cluster}"
-  PLEX_NAMESPACE:
-    sh: "echo ${PLEX_NAMESPACE:-plex-media-server}"
+# env:
+
+vars:
+  SCRIPT: '{{.SCRIPT | default  (printf "%s/bootstrap.sh" .ROOT_DIR)}}'
+  K8S_CLUSTER_NAME: '{{.K8S_CLUSTER_NAME | default "kube-plex-cluster"}}'
+  PLEX_NAMESPACE: '{{.PLEX_NAMESPACE | default "plex-media-server"}}'
 
 tasks:
   create:
